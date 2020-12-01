@@ -1,4 +1,4 @@
-use aoc20::day0::Solution;
+use aoc20::day1::Solution;
 use aoc20::Fail;
 
 fn main() -> Result<(), Fail> {
