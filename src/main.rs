@@ -1,9 +1,9 @@
-use aoc20::day1::Solution;
-use aoc20::Fail;
+use aoc20::day1;
+use aoc20::{Fail, Input, Solution};
 
 fn main() -> Result<(), Fail> {
-    let solution = Solution::new();
-    println!("{}", solution.part1()?);
-    println!("{}", solution.part2()?);
+    let input = Input::from(day1::DATA_PATH);
+    println!("{}", input.part1()?);
+    println!("{}", input.part2()?);
     Ok(())
 }

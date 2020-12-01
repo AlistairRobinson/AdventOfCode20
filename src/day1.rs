@@ -1,58 +1,31 @@
-use crate::Fail;
-use std::fs;
+use crate::{Fail, Input, Solution};
 
-pub struct Solution {
-    data: String,
-}
+pub static DATA_PATH: &str = "data/day1.txt";
+pub static TEST_PATH: &str = "data/test/day1.txt";
+pub static TEST_VALUES: (&str, &str) = ("514579", "241861950");
 
-impl Solution {
-    pub fn new() -> Solution {
-        let file: String = "data/day1.txt".to_string();
-        Solution {
-            data: fs::read_to_string(&file).expect(&format!("Unable to read file {}", file)),
+impl Solution for Input {
+    fn part1(&self) -> Result<String, Fail> {
+        let mut input: Vec<i32> = self.into();
+        input.sort();
+        match find_pair(&input, 2020) {
+            Some((x, y)) => Ok((x * y).to_string()),
+            None => Err("Failed to find a pair".into())
         }
     }
 
-    pub fn part1(&self) -> Result<String, Fail> {
-        let mut input = self
-            .data
-            .lines()
-            .map(|x| {
-                x.parse::<i32>()
-                    .expect(&format!("Unable to parse value {}", x))
-            })
-            .collect::<Vec<i32>>();
+    fn part2(&self) -> Result<String, Fail> {
+        let mut input: Vec<i32> = self.into();
         input.sort();
-        let (n1, n2) = find_pair(&input, 2020).ok_or("Failed to find a pair")?;
-        Ok((n1 * n2).to_string())
-    }
-
-    pub fn part2(&self) -> Result<String, Fail> {
-        let mut input = self
-            .data
-            .lines()
-            .map(|x| {
-                x.parse::<i32>()
-                    .expect(&format!("Unable to parse value {}", x))
-            })
-            .collect::<Vec<i32>>();
-        input.sort();
-        Ok((input
+        Ok(input
             .iter()
-            .fold(0, |b, i| match (b, find_pair(&input, 2020 - i)) {
-                (0, Some((j, k))) => i * j * k,
-                (0, None) => 0,
-                (b, _) => b,
-            }))
-        .to_string())
-    }
-}
-
-impl From<&str> for Solution {
-    fn from(file: &str) -> Solution {
-        Solution {
-            data: fs::read_to_string(file).expect(&format!("Unable to read file {}", file)),
-        }
+            .fold(Err("Failed to find a triple"), |b, i| {
+                match (b, find_pair(&input, 2020 - i)) {
+                    (Err(_), Some((j, k))) => Ok(i * j * k),
+                    (b, _) => b,
+                }
+            })?
+            .to_string())
     }
 }
 
@@ -72,15 +45,15 @@ mod tests {
     use super::*;
     #[test]
     fn test_part1() -> Result<(), Fail> {
-        let solution = Solution::from("data/test/day1.txt");
-        assert!(solution.part1()? == "514579", solution.part1()?);
+        let input = Input::from(TEST_PATH);
+        assert!(input.part1()? == TEST_VALUES.0, input.part1()?);
         Ok(())
     }
 
     #[test]
     fn test_part2() -> Result<(), Fail> {
-        let solution = Solution::from("data/test/day1.txt");
-        assert!(solution.part2()? == "241861950", solution.part2()?);
+        let input = Input::from(TEST_PATH);
+        assert!(input.part2()? == TEST_VALUES.1, input.part2()?);
         Ok(())
     }
 }
