@@ -43,21 +43,3 @@ fn valid_password_2(i_1: usize, i_2: usize, letter: char, pass: &str) -> Option<
     let chars: Vec<char> = pass.chars().collect();
     Some((chars[i_1 - 1] == letter) ^ (chars[i_2 - 1] == letter))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_part1() -> Result<(), Fail> {
-        let input = Input::from(TEST_PATH);
-        assert!(input.part1()? == TEST_VALUES.0, input.part1()?);
-        Ok(())
-    }
-
-    #[test]
-    fn test_part2() -> Result<(), Fail> {
-        let input = Input::from(TEST_PATH);
-        assert!(input.part2()? == TEST_VALUES.1, input.part2()?);
-        Ok(())
-    }
-}

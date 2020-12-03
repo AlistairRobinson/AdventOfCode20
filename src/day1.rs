@@ -39,21 +39,3 @@ fn find_pair(list: &[i32], sum: i32) -> Option<(i32, i32)> {
         _ => find_pair(&list[1..list.len()], sum),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_part1() -> Result<(), Fail> {
-        let input = Input::from(TEST_PATH);
-        assert!(input.part1()? == TEST_VALUES.0, input.part1()?);
-        Ok(())
-    }
-
-    #[test]
-    fn test_part2() -> Result<(), Fail> {
-        let input = Input::from(TEST_PATH);
-        assert!(input.part2()? == TEST_VALUES.1, input.part2()?);
-        Ok(())
-    }
-}
