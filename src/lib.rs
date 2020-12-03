@@ -26,6 +26,12 @@ impl From<&Input> for Vec<i32> {
     }
 }
 
+impl From<&Input> for Vec<Vec<char>> {
+    fn from(input: &Input) -> Vec<Vec<char>> {
+        input.data.lines().map(|x| x.chars().collect()).collect()
+    }
+}
+
 pub trait Solution {
     fn part1(&self) -> Result<String, Fail>;
     fn part2(&self) -> Result<String, Fail>;

@@ -6,7 +6,7 @@ pub static TEST_VALUES: (&str, &str) = ("7", "336");
 
 impl Solution for Input {
     fn part1(&self) -> Result<String, Fail> {
-        let input: Vec<Vec<char>> = self.data.lines().map(|x| x.chars().collect()).collect();
+        let input: Vec<Vec<char>> = self.into();
         Ok((0..input.len())
             .filter(|n| input[*n][(3 * n) % input[*n].len()] == '#')
             .count()
@@ -14,7 +14,7 @@ impl Solution for Input {
     }
 
     fn part2(&self) -> Result<String, Fail> {
-        let input: Vec<Vec<char>> = self.data.lines().map(|x| x.chars().collect()).collect();
+        let input: Vec<Vec<char>> = self.into();
         let slopes: Vec<fn(usize) -> (usize, usize)> = vec![
             { |n| (n, n) },
             { |n| (n, 3 * n) },
