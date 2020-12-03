@@ -7,20 +7,20 @@ pub static TEST_VALUES: (&str, &str) = ("2", "1");
 impl Solution for Input {
     fn part1(&self) -> Result<String, Fail> {
         let input: Vec<Vec<&str>> = self.data.lines().map(|x| x.split(" ").collect()).collect();
-        let input: Vec<&Vec<&str>> = input
+        Ok(input
             .iter()
             .filter(|y| parse_password_1(y.to_vec()).unwrap())
-            .collect();
-        Ok(input.len().to_string())
+            .count()
+            .to_string())
     }
 
     fn part2(&self) -> Result<String, Fail> {
         let input: Vec<Vec<&str>> = self.data.lines().map(|x| x.split(" ").collect()).collect();
-        let input: Vec<&Vec<&str>> = input
+        Ok(input
             .iter()
             .filter(|y| parse_password_2(y.to_vec()).unwrap())
-            .collect();
-        Ok(input.len().to_string())
+            .count()
+            .to_string())
     }
 }
 
@@ -30,11 +30,7 @@ fn parse_password_1(input: Vec<&str>) -> Option<bool> {
 }
 
 fn valid_password_1(min: i32, max: i32, letter: char, pass: &str) -> Option<bool> {
-    let len: i32 = pass
-        .chars()
-        .filter(|c| c == &letter)
-        .collect::<Vec<char>>()
-        .len() as i32;
+    let len: i32 = pass.chars().filter(|c| c == &letter).count() as i32;
     Some(len >= min && len <= max)
 }
 

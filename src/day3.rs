@@ -9,8 +9,7 @@ impl Solution for Input {
         let input: Vec<Vec<char>> = self.data.lines().map(|x| x.chars().collect()).collect();
         Ok((0..input.len())
             .filter(|n| input[*n][(3 * n) % input[*n].len()] == '#')
-            .collect::<Vec<_>>()
-            .len()
+            .count()
             .to_string())
     }
 
@@ -31,8 +30,7 @@ impl Solution for Input {
                         let (x, y) = f(*n);
                         x < input.len() && input[x][y % input[x].len()] == '#'
                     })
-                    .collect::<Vec<_>>()
-                    .len()
+                    .count()
             })
             .product::<usize>()
             .to_string())
