@@ -1,4 +1,4 @@
-use aoc20::day2::DATA_PATH;
+use aoc20::day3::DATA_PATH;
 use aoc20::{Fail, Input, Solution};
 
 fn main() -> Result<(), Fail> {
