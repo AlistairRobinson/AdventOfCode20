@@ -29,19 +29,17 @@ impl Solution for Input {
 }
 
 fn valid(input: &str) -> bool {
-    let mut i = input.split(":");
-    let (prefix, s) = (i.next().unwrap(), i.next().unwrap());
+    let i: Vec<&str> = input.split(":").collect();
+    let (prefix, s) = (i[0], i[1]);
     match prefix {
-        "byr" => s.parse::<i32>().is_ok() && (1920..2003).contains(&s.parse::<i32>().unwrap()),
-        "iyr" => s.parse::<i32>().is_ok() && (2010..2021).contains(&s.parse::<i32>().unwrap()),
-        "eyr" => s.parse::<i32>().is_ok() && (2020..2031).contains(&s.parse::<i32>().unwrap()),
+        "byr" => in_range(s, 1920, 2002),
+        "iyr" => in_range(s, 2010, 2020),
+        "eyr" => in_range(s, 2020, 2030),
         "hgt" => {
             if s.ends_with("cm") {
-                let h = s.strip_suffix("cm").unwrap();
-                h.parse::<i32>().is_ok() && (150..194).contains(&h.parse::<i32>().unwrap())
+                in_range(s.strip_suffix("cm").unwrap(), 150, 193)
             } else if s.ends_with("in") {
-                let h = s.strip_suffix("in").unwrap();
-                h.parse::<i32>().is_ok() && (59..77).contains(&h.parse::<i32>().unwrap())
+                in_range(s.strip_suffix("in").unwrap(), 59, 76)
             } else {
                 false
             }
@@ -55,7 +53,11 @@ fn valid(input: &str) -> bool {
                     .all(|c| c.is_ascii_hexdigit())
         }
         "ecl" => vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&s),
-        "pid" => s.len() == 9 && s.parse::<i32>().is_ok(),
+        "pid" => s.len() == 9 && in_range(s, 0, 999999999),
         _ => true,
     }
+}
+
+fn in_range(n: &str, min: i32, max: i32) -> bool {
+    n.parse::<i32>().is_ok() && (min..max + 1).contains(&n.parse::<i32>().unwrap())
 }
