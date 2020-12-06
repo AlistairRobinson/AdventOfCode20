@@ -35,22 +35,13 @@ fn valid(input: &str) -> bool {
         "byr" => in_range(s, 1920, 2002),
         "iyr" => in_range(s, 2010, 2020),
         "eyr" => in_range(s, 2020, 2030),
-        "hgt" => {
-            if s.ends_with("cm") {
-                in_range(s.strip_suffix("cm").unwrap(), 150, 193)
-            } else if s.ends_with("in") {
-                in_range(s.strip_suffix("in").unwrap(), 59, 76)
-            } else {
-                false
-            }
-        }
+        "hgt" => match &s[s.len() - 2..s.len()] {
+            "cm" => in_range(&s[..s.len() - 2], 150, 193),
+            "in" => in_range(&s[..s.len() - 2], 59, 76),
+            _ => false,
+        },
         "hcl" => {
-            s.starts_with("#")
-                && s.len() == 7
-                && s.strip_prefix("#")
-                    .unwrap()
-                    .chars()
-                    .all(|c| c.is_ascii_hexdigit())
+            &s[0..1] == "#" && s.len() == 7 && s[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "ecl" => vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&s),
         "pid" => s.len() == 9 && in_range(s, 0, 999999999),
