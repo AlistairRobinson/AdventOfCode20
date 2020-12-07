@@ -1,6 +1,6 @@
 use std::fs;
 
-pub mod day6;
+pub mod day7;
 
 pub type Fail = Box<dyn std::error::Error>;
 
