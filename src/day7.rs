@@ -28,17 +28,13 @@ fn get_edges(line: &str) -> Vec<((String, String), i32)> {
     let parts: Vec<&str> = clean.split(" contain ").collect();
     parts[1]
         .split(", ")
-        .map(|s| {
-            (
-                (parts[0].to_string(), s[2..].to_string()),
-                s[..1].parse().unwrap_or(0),
-            )
-        })
+        .map(|s| ((&parts[0], &s[2..]), s[..1].parse().unwrap_or(0)))
+        .map(|((x, y), n)| ((x.to_string(), y.to_string()), n))
         .collect()
 }
 
 fn find(target: String, map: HashMap<(String, String), i32>) -> HashSet<String> {
-    let nodes: Vec<_> = map
+    let nodes: Vec<String> = map
         .keys()
         .filter(|(_, y)| y == &target)
         .map(|(x, _)| x.clone())
@@ -50,20 +46,11 @@ fn find(target: String, map: HashMap<(String, String), i32>) -> HashSet<String> 
 }
 
 fn total(bag: String, quantity: i32, map: HashMap<(String, String), i32>) -> i32 {
-    let nodes: Vec<String> = map
+    let within: i32 = map
         .keys()
         .filter(|(x, _)| x == &bag)
-        .map(|(_, y)| y.clone())
-        .collect();
-    let total: i32 = nodes
-        .iter()
-        .map(|n| {
-            total(
-                n.to_string(),
-                *map.get(&(bag.clone(), n.to_string())).unwrap(),
-                map.clone(),
-            )
-        })
+        .map(|(_, y)| y.clone().to_string())
+        .map(|n| total(n.clone(), *map.get(&(bag.clone(), n)).unwrap(), map.clone()))
         .sum::<i32>();
-    quantity + quantity * total
+    quantity + quantity * within
 }
