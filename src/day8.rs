@@ -1,24 +1,41 @@
 use crate::{Fail, Input, Solution};
-use std::collections::HashSet;
 use std::cmp::max;
+use std::collections::HashSet;
 
 pub static DATA_PATH: &str = "data/day8.txt";
 pub static TEST_PATH: &str = "data/test/day8.txt";
 pub static TEST_VALUES: (&str, &str) = ("5", "8");
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub enum Instruction {
     ACC(i32),
     JMP(i32),
     NOP(i32),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Program {
     pc: usize,
     acc: i32,
     instr: Vec<Instruction>,
     halted: bool,
+}
+
+#[derive(Debug)]
+pub struct State {
+    pc: usize,
+    acc: i32,
+    halted: bool,
+}
+
+impl From<&mut Program> for State {
+    fn from(p: &mut Program) -> State {
+        State {
+            pc: p.pc,
+            acc: p.acc,
+            halted: p.halted,
+        }
+    }
 }
 
 impl From<&Input> for Program {
@@ -43,13 +60,13 @@ impl From<&Input> for Program {
 }
 
 impl Iterator for Program {
-    type Item = Program;
-    fn next(&mut self) -> Option<Program> {
+    type Item = State;
+    fn next(&mut self) -> Option<State> {
         if self.halted {
             None
         } else if self.pc >= self.instr.len() {
             self.halted = true;
-            Some(self.clone())
+            Some(self.into())
         } else {
             match self.instr[self.pc] {
                 Instruction::ACC(i) => self.acc += i,
@@ -57,7 +74,7 @@ impl Iterator for Program {
                 Instruction::NOP(_) => self.acc += 0,
             }
             self.pc = (self.pc + 1) as usize;
-            Some(self.clone())
+            Some(self.into())
         }
     }
 }
@@ -72,7 +89,7 @@ impl Program {
         }
     }
 
-    fn run(&mut self) -> Program {
+    fn run(&mut self) -> State {
         let mut ins: HashSet<usize> = HashSet::new();
         self.into_iter()
             .skip_while(|p| ins.insert(p.pc) && !p.halted)
@@ -80,12 +97,11 @@ impl Program {
             .unwrap()
     }
 
-    fn halts(&mut self) -> Option<Program> {
-        let result: Program = self.run();
-        if result.pc < result.instr.len() {
-            None
-        } else {
-            Some(result)
+    fn halts(&mut self) -> Option<State> {
+        let result: State = self.run();
+        match result.halted {
+            true => Some(result),
+            false => None,
         }
     }
 }
@@ -102,7 +118,7 @@ impl Solution for Input {
             .instr
             .iter()
             .enumerate()
-            .filter_map(is_swappable)
+            .filter_map(swappable)
             .fold(None, |b, i| match b {
                 Some(_) => b,
                 None => Program::new(swap(input.instr.clone(), i)).halts(),
@@ -113,7 +129,7 @@ impl Solution for Input {
     }
 }
 
-fn is_swappable(t: (usize, &Instruction)) -> Option<usize> {
+fn swappable(t: (usize, &Instruction)) -> Option<usize> {
     match t.1 {
         Instruction::ACC(_) => None,
         Instruction::JMP(_) => Some(t.0),
