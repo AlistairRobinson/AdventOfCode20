@@ -1,9 +1,10 @@
 use crate::{Fail, Input, Solution};
 use std::collections::HashSet;
+use std::cmp::max;
 
 pub static DATA_PATH: &str = "data/day8.txt";
 pub static TEST_PATH: &str = "data/test/day8.txt";
-pub static TEST_VALUES: (&str, &str) = ("5", "5");
+pub static TEST_VALUES: (&str, &str) = ("5", "8");
 
 #[derive(Clone, Debug)]
 pub enum Instruction {
@@ -17,6 +18,7 @@ pub struct Program {
     pc: usize,
     acc: i32,
     instr: Vec<Instruction>,
+    halted: bool,
 }
 
 impl From<&Input> for Program {
@@ -35,6 +37,7 @@ impl From<&Input> for Program {
                     _ => Instruction::NOP(0),
                 })
                 .collect(),
+            halted: false,
         }
     }
 }
@@ -42,46 +45,55 @@ impl From<&Input> for Program {
 impl Iterator for Program {
     type Item = Program;
     fn next(&mut self) -> Option<Program> {
-        if self.pc >= self.instr.len() {
-            return None;
+        if self.halted {
+            None
+        } else if self.pc >= self.instr.len() {
+            self.halted = true;
+            Some(self.clone())
+        } else {
+            match self.instr[self.pc] {
+                Instruction::ACC(i) => self.acc += i,
+                Instruction::JMP(i) => self.pc = max(self.pc as i32 + i - 1, 0) as usize,
+                Instruction::NOP(_) => self.acc += 0,
+            }
+            self.pc = (self.pc + 1) as usize;
+            Some(self.clone())
         }
-        match self.instr[self.pc] {
-            Instruction::ACC(i) => self.acc += i,
-            Instruction::JMP(i) => self.pc = ((self.pc as i32 - 1) + i) as usize,
-            Instruction::NOP(_) => self.acc += 0,
-        }
-        self.pc += 1;
-        Some(self.clone())
     }
 }
 
 impl Program {
-    fn halts(&mut self) -> Option<i32> {
+    fn new(instr: Vec<Instruction>) -> Program {
+        Program {
+            pc: 0,
+            acc: 0,
+            instr: instr,
+            halted: false,
+        }
+    }
+
+    fn run(&mut self) -> Program {
         let mut ins: HashSet<usize> = HashSet::new();
-        let result: Program = self
-            .into_iter()
-            .take_while(|p| ins.insert(p.pc))
-            .last()
-            .unwrap();
+        self.into_iter()
+            .skip_while(|p| ins.insert(p.pc) && !p.halted)
+            .next()
+            .unwrap()
+    }
+
+    fn halts(&mut self) -> Option<Program> {
+        let result: Program = self.run();
         if result.pc < result.instr.len() {
             None
         } else {
-            Some(result.acc)
+            Some(result)
         }
     }
 }
 
 impl Solution for Input {
     fn part1(&self) -> Result<String, Fail> {
-        let input: Program = self.into();
-        let mut ins: HashSet<usize> = HashSet::new();
-        Ok(input
-            .into_iter()
-            .take_while(|p| ins.insert(p.pc))
-            .last()
-            .unwrap()
-            .acc
-            .to_string())
+        let mut input: Program = self.into();
+        Ok(input.run().acc.to_string())
     }
 
     fn part2(&self) -> Result<String, Fail> {
@@ -90,22 +102,22 @@ impl Solution for Input {
             .instr
             .iter()
             .enumerate()
-            .filter_map(|(i, x)| match x {
-                Instruction::ACC(_) => None,
-                Instruction::JMP(_) => Some(i),
-                Instruction::NOP(_) => Some(i),
-            })
+            .filter_map(is_swappable)
             .fold(None, |b, i| match b {
                 Some(_) => b,
-                None => (Program {
-                    pc: 0,
-                    acc: 0,
-                    instr: swap(input.instr.clone(), i),
-                })
-                .halts(),
+                None => Program::new(swap(input.instr.clone(), i)).halts(),
             })
             .unwrap()
+            .acc
             .to_string())
+    }
+}
+
+fn is_swappable(t: (usize, &Instruction)) -> Option<usize> {
+    match t.1 {
+        Instruction::ACC(_) => None,
+        Instruction::JMP(_) => Some(t.0),
+        Instruction::NOP(_) => Some(t.0),
     }
 }
 
