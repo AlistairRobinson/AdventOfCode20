@@ -1,6 +1,6 @@
 #![allow(unused_imports)]
 
-use aoc20::day8::{DATA_PATH, TEST_PATH, TEST_VALUES};
+use aoc20::day9::{DATA_PATH, TEST_PATH, TEST_VALUES};
 use aoc20::{Fail, Input, Solution};
 
 fn main() -> Result<(), Fail> {

@@ -1,6 +1,6 @@
 use std::fs;
 
-pub mod day8;
+pub mod day9;
 
 pub type Fail = Box<dyn std::error::Error>;
 
@@ -22,7 +22,17 @@ impl From<&Input> for Vec<i32> {
             .data
             .lines()
             .map(|x| x.parse::<i32>().expect(&format!("Unable to parse {}", x)))
-            .collect::<Vec<i32>>()
+            .collect()
+    }
+}
+
+impl From<&Input> for Vec<i64> {
+    fn from(input: &Input) -> Vec<i64> {
+        input
+            .data
+            .lines()
+            .map(|x| x.parse::<i64>().expect(&format!("Unable to parse {}", x)))
+            .collect()
     }
 }
 
