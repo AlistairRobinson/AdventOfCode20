@@ -13,36 +13,29 @@ pub enum Instruction {
     NOP(i32),
 }
 
-#[derive(Debug)]
-pub struct Program {
-    pc: usize,
-    acc: i32,
-    instr: Vec<Instruction>,
-    halted: bool,
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct State {
     pc: usize,
     acc: i32,
     halted: bool,
 }
 
-impl From<&mut Program> for State {
-    fn from(p: &mut Program) -> State {
-        State {
-            pc: p.pc,
-            acc: p.acc,
-            halted: p.halted,
-        }
+impl State {
+    fn new() -> State {
+        State { pc: 0, acc: 0, halted: false }
     }
+}
+
+#[derive(Debug)]
+pub struct Program {
+    state: State,
+    instr: Vec<Instruction>,
 }
 
 impl From<&Input> for Program {
     fn from(input: &Input) -> Program {
         Program {
-            pc: 0,
-            acc: 0,
+            state: State::new(),
             instr: input
                 .data
                 .lines()
@@ -54,7 +47,6 @@ impl From<&Input> for Program {
                     _ => Instruction::NOP(0),
                 })
                 .collect(),
-            halted: false,
         }
     }
 }
@@ -62,19 +54,19 @@ impl From<&Input> for Program {
 impl Iterator for Program {
     type Item = State;
     fn next(&mut self) -> Option<State> {
-        if self.halted {
+        if self.state.halted {
             None
-        } else if self.pc >= self.instr.len() {
-            self.halted = true;
-            Some(self.into())
+        } else if self.state.pc >= self.instr.len() {
+            self.state.halted = true;
+            Some(self.state.clone())
         } else {
-            match self.instr[self.pc] {
-                Instruction::ACC(i) => self.acc += i,
-                Instruction::JMP(i) => self.pc = max(self.pc as i32 + i - 1, 0) as usize,
-                Instruction::NOP(_) => self.acc += 0,
+            match self.instr[self.state.pc] {
+                Instruction::ACC(i) => self.state.acc += i,
+                Instruction::JMP(i) => self.state.pc = max(self.state.pc as i32 + i - 1, 0) as usize,
+                Instruction::NOP(_) => self.state.acc += 0,
             }
-            self.pc = (self.pc + 1) as usize;
-            Some(self.into())
+            self.state.pc = (self.state.pc + 1) as usize;
+            Some(self.state.clone())
         }
     }
 }
@@ -82,10 +74,8 @@ impl Iterator for Program {
 impl Program {
     fn new(instr: Vec<Instruction>) -> Program {
         Program {
-            pc: 0,
-            acc: 0,
+            state: State::new(),
             instr: instr,
-            halted: false,
         }
     }
 
