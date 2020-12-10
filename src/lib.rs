@@ -1,6 +1,7 @@
+use std::collections::HashSet;
 use std::fs;
 
-pub mod day9;
+pub mod day10;
 
 pub type Fail = Box<dyn std::error::Error>;
 
@@ -39,6 +40,16 @@ impl From<&Input> for Vec<i64> {
 impl From<&Input> for Vec<Vec<char>> {
     fn from(input: &Input) -> Vec<Vec<char>> {
         input.data.lines().map(|x| x.chars().collect()).collect()
+    }
+}
+
+impl From<&Input> for HashSet<i32> {
+    fn from(input: &Input) -> HashSet<i32> {
+        input
+            .data
+            .lines()
+            .map(|x| x.parse::<i32>().expect(&format!("Unable to parse {}", x)))
+            .collect()
     }
 }
 
