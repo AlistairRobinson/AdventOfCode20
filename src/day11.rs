@@ -10,26 +10,35 @@ pub type Point = (i32, i32);
 #[derive(Clone, Debug)]
 pub struct SpaceOne {
     map: HashMap<Point, char>,
-    taken: usize,
+    mutable: Vec<Point>,
+    taken: i32,
 }
 
 #[derive(Clone, Debug)]
 pub struct SpaceTwo {
     map: HashMap<Point, char>,
-    taken: usize,
+    mutable: Vec<Point>,
+    taken: i32,
 }
 
 impl Iterator for SpaceOne {
-    type Item = usize;
-    fn next(&mut self) -> Option<usize> {
+    type Item = i32;
+    fn next(&mut self) -> Option<i32> {
         let state: SpaceOne = self.clone();
-        let empty: Vec<Point> = state.empty();
-        let taken: Vec<Point> = state.taken();
-        if empty.len() == 0 && taken.len() == 0 {
+        let taken: i32 = state.mutable
+            .iter()
+            .filter(|p| state.map.get(p) == Some(&'L') && state.adj(**p) == 0)
+            .map(|e| self.map.insert(*e, '#'))
+            .count() as i32;
+        let empty: i32 = state.mutable
+            .iter()
+            .filter(|p| state.map.get(p) == Some(&'#') && state.adj(**p) >= 4)
+            .map(|o| self.map.insert(*o, 'L'))
+            .count() as i32;
+        if taken == 0 && empty == 0 {
             None
         } else {
-            self.taken = state.taken + empty.iter().map(|e| self.map.insert(*e, '#')).count()
-                - taken.iter().map(|o| self.map.insert(*o, 'L')).count();
+            self.taken = state.taken + taken - empty;
             Some(self.taken)
         }
     }
@@ -37,23 +46,15 @@ impl Iterator for SpaceOne {
 
 impl SpaceOne {
     fn new(map: HashMap<Point, char>) -> SpaceOne {
-        SpaceOne { map: map, taken: 0 }
-    }
-
-    fn empty(&self) -> Vec<Point> {
-        self.map
-            .keys()
-            .filter(|p| self.map.get(p) == Some(&'L') && self.adj(**p) == 0)
-            .map(|p| *p)
-            .collect()
-    }
-
-    fn taken(&self) -> Vec<Point> {
-        self.map
-            .keys()
-            .filter(|p| self.map.get(p) == Some(&'#') && self.adj(**p) >= 4)
-            .map(|p| *p)
-            .collect()
+        SpaceOne {
+            map: map.clone(),
+            mutable: map
+                .keys()
+                .filter(|p| map.get(p) != Some(&'.'))
+                .map(|p| *p)
+                .collect(),
+            taken: 0,
+        }
     }
 
     fn adj(&self, (x, y): Point) -> i32 {
@@ -62,24 +63,30 @@ impl SpaceOne {
                 (-1..2).map(move |j| match self.map.get(&(x + i, y + j)) {
                     Some('#') if (i, j) != (0, 0) => 1,
                     _ => 0,
-                })
+                }).sum::<i32>()
             })
-            .flatten()
             .sum()
     }
 }
 
 impl Iterator for SpaceTwo {
-    type Item = usize;
-    fn next(&mut self) -> Option<usize> {
+    type Item = i32;
+    fn next(&mut self) -> Option<i32> {
         let state: SpaceTwo = self.clone();
-        let empty: Vec<Point> = state.empty();
-        let taken: Vec<Point> = state.taken();
-        if empty.len() == 0 && taken.len() == 0 {
+        let taken: i32 = state.mutable
+            .iter()
+            .filter(|p| state.map.get(p) == Some(&'L') && state.visible(**p) == 0)
+            .map(|e| self.map.insert(*e, '#'))
+            .count() as i32;
+        let empty: i32 = state.mutable
+            .iter()
+            .filter(|p| state.map.get(p) == Some(&'#') && state.visible(**p) >= 5)
+            .map(|o| self.map.insert(*o, 'L'))
+            .count() as i32;
+        if taken == 0 && empty == 0 {
             None
         } else {
-            self.taken = state.taken + empty.iter().map(|e| self.map.insert(*e, '#')).count()
-                - taken.iter().map(|o| self.map.insert(*o, 'L')).count();
+            self.taken = state.taken + taken - empty;
             Some(self.taken)
         }
     }
@@ -87,23 +94,15 @@ impl Iterator for SpaceTwo {
 
 impl SpaceTwo {
     fn new(map: HashMap<Point, char>) -> SpaceTwo {
-        SpaceTwo { map: map, taken: 0 }
-    }
-
-    fn empty(&self) -> Vec<Point> {
-        self.map
-            .keys()
-            .filter(|p| self.map.get(p) == Some(&'L') && self.visible(**p) == 0)
-            .map(|p| *p)
-            .collect()
-    }
-
-    fn taken(&self) -> Vec<Point> {
-        self.map
-            .keys()
-            .filter(|p| self.map.get(p) == Some(&'#') && self.visible(**p) >= 5)
-            .map(|p| *p)
-            .collect()
+        SpaceTwo {
+            map: map.clone(),
+            mutable: map
+                .keys()
+                .filter(|p| map.get(p) != Some(&'.'))
+                .map(|p| *p)
+                .collect(),
+            taken: 0,
+        }
     }
 
     fn visible(&self, (x, y): Point) -> i32 {
@@ -115,9 +114,8 @@ impl SpaceTwo {
                         .next()
                         .unwrap();
                     ((i, j) != (0, 0) && self.map.get(&(x + n * i, y + n * j)) == Some(&'#')) as i32
-                })
+                }).sum::<i32>()
             })
-            .flatten()
             .sum()
     }
 }
@@ -125,8 +123,7 @@ impl SpaceTwo {
 impl Solution for Input {
     fn part1(&self) -> Result<String, Fail> {
         let input: HashMap<Point, char> = self.into();
-        let space: SpaceOne = SpaceOne::new(input);
-        Ok(space
+        Ok(SpaceOne::new(input)
             .into_iter()
             .last()
             .ok_or("No states found")?
@@ -135,8 +132,7 @@ impl Solution for Input {
 
     fn part2(&self) -> Result<String, Fail> {
         let input: HashMap<Point, char> = self.into();
-        let space: SpaceTwo = SpaceTwo::new(input);
-        Ok(space
+        Ok(SpaceTwo::new(input)
             .into_iter()
             .last()
             .ok_or("No states found")?
