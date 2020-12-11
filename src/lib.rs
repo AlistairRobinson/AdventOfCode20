@@ -1,7 +1,8 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 
-pub mod day10;
+pub mod day11;
 
 pub type Fail = Box<dyn std::error::Error>;
 
@@ -49,6 +50,22 @@ impl From<&Input> for HashSet<i32> {
             .data
             .lines()
             .map(|x| x.parse::<i32>().expect(&format!("Unable to parse {}", x)))
+            .collect()
+    }
+}
+
+impl From<&Input> for HashMap<(i32, i32), char> {
+    fn from(input: &Input) -> HashMap<(i32, i32), char> {
+        input
+            .data
+            .lines()
+            .enumerate()
+            .map(|(y, s)| {
+                s.chars()
+                    .enumerate()
+                    .map(move |(x, c)| ((x as i32, y as i32), c))
+            })
+            .flatten()
             .collect()
     }
 }
