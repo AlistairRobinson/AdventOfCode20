@@ -4,7 +4,7 @@ pub static DATA_PATH: &str = "data/day12.txt";
 pub static TEST_PATH: &str = "data/test/day12.txt";
 pub static TEST_VALUES: (&str, &str) = ("25", "286");
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Facing {
     North,
     South,
@@ -14,7 +14,7 @@ pub enum Facing {
 
 type Point = (i32, i32);
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct PositionOne {
     point: Point,
     facing: Facing,
@@ -120,7 +120,7 @@ impl Solution for Input {
                     'E' => p.advance(Facing::East, x),
                     'S' => p.advance(Facing::South, x),
                     'W' => p.advance(Facing::West, x),
-                    'F' => p.clone().advance(p.facing, x),
+                    'F' => p.advance(p.facing, x),
                     'L' => p.rotate(x * 3),
                     'R' => p.rotate(x),
                     _ => p,
