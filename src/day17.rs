@@ -10,7 +10,7 @@ pub static TEST_VALUES: (&str, &str) = ("112", "848");
 pub type Point = (i32, i32, i32);
 pub type HyperPoint = (i32, i32, i32, i32);
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Space {
     map: HashMap<Point, char>,
     cubes: i32,
@@ -19,29 +19,30 @@ pub struct Space {
 impl Iterator for Space {
     type Item = i32;
     fn next(&mut self) -> Option<i32> {
-        let state: Space = self.clone();
-        let points: HashSet<Point> = state
+        let points: HashSet<Point> = self
             .map
             .iter()
             .map(|(k, _)| Space::neighbours(*k))
             .flatten()
             .collect();
-        let removed: i32 = points
+        let invalid: HashSet<&Point> = points
             .iter()
             .filter(|p| {
-                state.map.get(p) == Some(&'#') && ((state.adj(**p) <= 1) | (state.adj(**p) >= 4))
+                self.map.get(p) == Some(&'#') && ((self.adj(**p) <= 1) | (self.adj(**p) >= 4))
             })
-            .map(|p| self.map.insert(*p, '.'))
-            .count() as i32;
-        let filled: i32 = points
+            .collect();
+        let valid: HashSet<&Point> = points
             .iter()
-            .filter(|p| state.map.get(p) != Some(&'#') && (state.adj(**p) == 3))
-            .map(|p| self.map.insert(*p, '#'))
+            .filter(|p| self.map.get(p) != Some(&'#') && (self.adj(**p) == 3))
+            .collect();
+        let removed: i32 = invalid.iter().map(|p| self.map.insert(**p, '.')).count() as i32;
+        let filled: i32 = valid.iter()
+            .map(|p| self.map.insert(**p, '#'))
             .count() as i32;
         if removed == 0 && filled == 0 {
             None
         } else {
-            self.cubes = state.cubes + filled - removed;
+            self.cubes = self.cubes + filled - removed;
             Some(self.cubes)
         }
     }
@@ -76,7 +77,7 @@ impl Space {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct HyperSpace {
     map: HashMap<HyperPoint, char>,
     cubes: i32,
@@ -85,29 +86,30 @@ pub struct HyperSpace {
 impl Iterator for HyperSpace {
     type Item = i32;
     fn next(&mut self) -> Option<i32> {
-        let state: HyperSpace = self.clone();
-        let points: HashSet<HyperPoint> = state
+        let points: HashSet<HyperPoint> = self
             .map
             .iter()
             .map(|(k, _)| HyperSpace::neighbours(*k))
             .flatten()
             .collect();
-        let removed: i32 = points
+        let invalid: HashSet<&HyperPoint> = points
             .iter()
             .filter(|p| {
-                state.map.get(p) == Some(&'#') && ((state.adj(**p) <= 1) | (state.adj(**p) >= 4))
+                self.map.get(p) == Some(&'#') && ((self.adj(**p) <= 1) | (self.adj(**p) >= 4))
             })
-            .map(|p| self.map.insert(*p, '.'))
-            .count() as i32;
-        let filled: i32 = points
+            .collect();
+        let valid: HashSet<&HyperPoint> = points
             .iter()
-            .filter(|p| state.map.get(p) != Some(&'#') && (state.adj(**p) == 3))
-            .map(|p| self.map.insert(*p, '#'))
+            .filter(|p| self.map.get(p) != Some(&'#') && (self.adj(**p) == 3))
+            .collect();
+        let removed: i32 = invalid.iter().map(|p| self.map.insert(**p, '.')).count() as i32;
+        let filled: i32 = valid.iter()
+            .map(|p| self.map.insert(**p, '#'))
             .count() as i32;
         if removed == 0 && filled == 0 {
             None
         } else {
-            self.cubes = state.cubes + filled - removed;
+            self.cubes = self.cubes + filled - removed;
             Some(self.cubes)
         }
     }
