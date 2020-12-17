@@ -55,7 +55,7 @@ impl Space {
         }
     }
 
-    fn neighbours((x, y, z): Point) -> impl Iterator<Item=Point> {
+    fn neighbours((x, y, z): Point) -> impl Iterator<Item = Point> {
         (-1..2)
             .map(move |i| {
                 (-1..2)
@@ -121,7 +121,7 @@ impl HyperSpace {
         }
     }
 
-    fn neighbours((x, y, z, w): HyperPoint) -> impl Iterator<Item=HyperPoint> {
+    fn neighbours((x, y, z, w): HyperPoint) -> impl Iterator<Item = HyperPoint> {
         (-1..2)
             .map(move |i| {
                 (-1..2)
