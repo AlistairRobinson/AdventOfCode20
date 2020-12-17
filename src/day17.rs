@@ -36,9 +36,7 @@ impl Iterator for Space {
             .filter(|p| self.map.get(p) != Some(&'#') && (self.adj(**p) == 3))
             .collect();
         let removed: i32 = invalid.iter().map(|p| self.map.insert(**p, '.')).count() as i32;
-        let filled: i32 = valid.iter()
-            .map(|p| self.map.insert(**p, '#'))
-            .count() as i32;
+        let filled: i32 = valid.iter().map(|p| self.map.insert(**p, '#')).count() as i32;
         if removed == 0 && filled == 0 {
             None
         } else {
@@ -103,9 +101,7 @@ impl Iterator for HyperSpace {
             .filter(|p| self.map.get(p) != Some(&'#') && (self.adj(**p) == 3))
             .collect();
         let removed: i32 = invalid.iter().map(|p| self.map.insert(**p, '.')).count() as i32;
-        let filled: i32 = valid.iter()
-            .map(|p| self.map.insert(**p, '#'))
-            .count() as i32;
+        let filled: i32 = valid.iter().map(|p| self.map.insert(**p, '#')).count() as i32;
         if removed == 0 && filled == 0 {
             None
         } else {
